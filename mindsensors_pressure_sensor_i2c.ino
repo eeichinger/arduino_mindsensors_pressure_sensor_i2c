@@ -19,6 +19,8 @@ LiquidCrystal_I2C lcd(lcdAddress, lcdColumns, lcdRows);
 
 // Motor Control
 const int motorPin = 9;
+// Setpoint Pot
+const int setpointPin = A3;
 
 int readAbsolutePressureValue() {
   // step 3: instruct sensor to return a particular echo reading
@@ -61,12 +63,14 @@ void setReferencePressure() {
 
 int referencePressure = -1;
 int lastPressure = -1;
-const int setpointHigh = 20;
-const int setpointLow = 10;
+//int setpointHigh = 20;
+//int setpoint = 15;
+//int setpointLow = 10;
 boolean wasHigh = false;
 
 void setup() {
   pinMode(motorPin, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
+  pinMode(setpointPin, INPUT);     // Initialize the LED_BUILTIN pin as an output
   // initialize LCD
   lcd.init();
   // turn on LCD backlight
@@ -82,6 +86,11 @@ void setup() {
 }
 
 void loop() {
+  int setpoint = map(analogRead(setpointPin), 0, 1023, 10, 40);
+  int setpointHigh = setpoint+5;
+  int setpointLow = setpoint-5;
+  Serial.print("SP:");Serial.println(setpoint);
+  
   int currentPressure = readAbsolutePressureValue() - referencePressure;
   Serial.print("currentPressure:"); Serial.println(currentPressure);
   if (!wasHigh) {
@@ -106,10 +115,12 @@ void loop() {
   // set cursor to first column, first row
   lcd.setCursor(0, 0);
   // print message
-  lcd.print("Hello, World!");
+  lcd.print("SP:");
+  lcd.print(setpoint);
+  lcd.print(", ");  
   // set cursor to first column, second row
-  lcd.setCursor(0, 1);
-  lcd.print("Pressure:");
+//  lcd.setCursor(0, 1);
+  lcd.print("PSI:");
   if (currentPressure<10) {
     lcd.print("0");
   }
